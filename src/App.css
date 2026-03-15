@@ -1,0 +1,403 @@
+/* ── Reset & base ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── App shell ────────────────────────────────────────────── */
+.app {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(ellipse at 60% 0%, #1a3a1a 0%, #0d1f0d 40%, #080f08 100%);
+  color: #d4e8c2;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.app::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 80%, rgba(74,124,44,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 60% at 80% 20%, rgba(44,84,14,0.10) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 28px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  backdrop-filter: blur(8px);
+  background: rgba(8, 20, 8, 0.6);
+  position: relative;
+  z-index: 10;
+}
+
+.header-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #c8e6a0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.leaf-icon { font-size: 1.5rem; }
+
+.stage-badge {
+  font-size: 0.75rem;
+  font-family: system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--stage-color);
+  border: 1px solid var(--stage-color);
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--stage-color) 12%, transparent);
+  transition: all 0.5s ease;
+}
+
+/* ── Stage area ───────────────────────────────────────────── */
+.stage-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  padding: 16px 20px;
+  gap: 12px;
+}
+
+/* ── Plant scene ──────────────────────────────────────────── */
+.plant-scene {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+  overflow: visible;
+}
+
+/* ── Plant SVG ────────────────────────────────────────────── */
+.plant-svg {
+  width: 260px;
+  height: 300px;
+  overflow: visible;
+  transform-origin: bottom center;
+  transform: scale(var(--plant-scale));
+  transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: drop-shadow(0 20px 40px rgba(0,60,0,0.45));
+  position: relative;
+  z-index: 2;
+}
+
+/* ── Plant states ─────────────────────────────────────────── */
+@keyframes wobble {
+  0%   { transform: scale(var(--plant-scale)) rotate(0deg); }
+  15%  { transform: scale(var(--plant-scale)) rotate(-2.5deg); }
+  30%  { transform: scale(var(--plant-scale)) rotate(2deg); }
+  45%  { transform: scale(var(--plant-scale)) rotate(-1.5deg); }
+  60%  { transform: scale(var(--plant-scale)) rotate(1deg); }
+  75%  { transform: scale(var(--plant-scale)) rotate(-0.5deg); }
+  100% { transform: scale(var(--plant-scale)) rotate(0deg); }
+}
+
+@keyframes responding-pulse {
+  0%   { transform: scale(var(--plant-scale)); filter: drop-shadow(0 20px 40px rgba(0,60,0,0.45)); }
+  50%  { transform: scale(calc(var(--plant-scale) * 1.04)); filter: drop-shadow(0 24px 50px rgba(0,150,0,0.6)); }
+  100% { transform: scale(var(--plant-scale)); filter: drop-shadow(0 20px 40px rgba(0,60,0,0.45)); }
+}
+
+.plant-waiting {
+  animation: wobble 1.4s ease-in-out infinite;
+}
+
+.plant-responding {
+  animation: responding-pulse 0.6s ease-out 2;
+}
+
+/* ── Speech bubble ────────────────────────────────────────── */
+.speech-bubble {
+  display: inline-block;
+  max-width: min(360px, 88vw);
+  background: rgba(20, 42, 14, 0.92);
+  border: 1px solid rgba(120, 180, 60, 0.3);
+  border-radius: 16px;
+  padding: 12px 18px;
+  box-shadow:
+    0 8px 28px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+  transition: opacity 0.38s ease, transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  z-index: 100;
+}
+
+.bubble-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.bubble-text {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #c8e6a0;
+  text-align: center;
+  font-style: italic;
+}
+
+.bubble-tail {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid rgba(20, 42, 14, 0.92);
+}
+
+/* ── Leaf burst ───────────────────────────────────────────── */
+.leaf-burst {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 30;
+}
+
+.burst-leaf {
+  position: absolute;
+  width: 10px;
+  height: 16px;
+  background: var(--bcolor);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(var(--brot)) scale(0);
+  opacity: 0;
+  top: 0;
+  left: 0;
+}
+
+@keyframes burst-fly {
+  0%   { transform: rotate(var(--brot)) scale(0) translate(0,0); opacity: 1; }
+  60%  { opacity: 0.9; }
+  100% { transform: rotate(calc(var(--brot) + 180deg)) scale(1) translate(var(--bx), var(--by)); opacity: 0; }
+}
+
+.burst-active .burst-leaf {
+  animation: burst-fly 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation-delay: var(--bdelay);
+}
+
+/* ── Stage progress ───────────────────────────────────────── */
+.stage-progress {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.stage-pip {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  transition: all 0.5s ease;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.pip-active {
+  background: var(--pip-color);
+  border-color: var(--pip-color);
+  box-shadow: 0 0 6px var(--pip-color);
+}
+
+.pip-current {
+  width: 12px;
+  height: 12px;
+  box-shadow: 0 0 10px var(--pip-color), 0 0 20px color-mix(in srgb, var(--pip-color) 40%, transparent);
+}
+
+.stage-label {
+  font-size: 0.8rem;
+  font-family: system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  opacity: 0.8;
+  transition: color 0.5s ease;
+}
+
+/* ── Input area ───────────────────────────────────────────── */
+.input-area {
+  padding: 16px 20px 20px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  background: rgba(8, 20, 8, 0.8);
+  backdrop-filter: blur(12px);
+  position: relative;
+  z-index: 10;
+}
+
+.input-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.msg-input {
+  flex: 1;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(120,180,60,0.25);
+  border-radius: 14px;
+  padding: 12px 16px;
+  color: #d4e8c2;
+  font-family: system-ui, sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  resize: none;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.msg-input::placeholder { color: rgba(180,220,130,0.35); }
+
+.msg-input:focus {
+  border-color: rgba(120,180,60,0.6);
+  box-shadow: 0 0 0 3px rgba(120,180,60,0.1);
+  background: rgba(255,255,255,0.08);
+}
+
+.msg-input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.send-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #4caf50, #2e7d32);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(76,175,80,0.4);
+}
+
+.send-btn svg { width: 20px; height: 20px; }
+
+.send-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #66bb6a, #388e3c);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(76,175,80,0.5);
+}
+
+.send-btn:active:not(:disabled) { transform: translateY(0); }
+
+.send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.send-btn.sending {
+  background: linear-gradient(135deg, #388e3c, #1b5e20);
+  animation: pulse-btn 1s ease-in-out infinite;
+}
+
+@keyframes pulse-btn {
+  0%, 100% { box-shadow: 0 4px 12px rgba(76,175,80,0.4); }
+  50%       { box-shadow: 0 4px 20px rgba(76,175,80,0.7); }
+}
+
+/* ── Spinner ──────────────────────────────────────────────── */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.input-hint {
+  text-align: center;
+  font-size: 0.72rem;
+  font-family: system-ui, sans-serif;
+  color: rgba(180,220,130,0.3);
+  margin-top: 8px;
+  letter-spacing: 0.03em;
+}
+
+/* ── Ambient particles ────────────────────────────────────── */
+.app::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(120,200,60,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 70%, rgba(100,180,40,0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 20%, rgba(140,200,70,0.25) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 80%, rgba(80,160,30,0.2) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+  animation: drift 20s ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+  0%   { transform: translate(0, 0); }
+  100% { transform: translate(-10px, -15px); }
+}
+
+/* ── Stage glow animations ────────────────────────────────── */
+@keyframes majestic-glow {
+  0%, 100% { filter: drop-shadow(0 20px 40px rgba(0,80,0,0.5)) drop-shadow(0 0 18px rgba(30,100,30,0.3)); }
+  50%       { filter: drop-shadow(0 22px 52px rgba(0,130,0,0.7)) drop-shadow(0 0 32px rgba(30,100,30,0.55)); }
+}
+
+@keyframes ancient-glow {
+  0%, 100% { filter: drop-shadow(0 0 14px rgba(40,140,20,0.32)) drop-shadow(0 20px 40px rgba(0,50,0,0.55)); }
+  50%       { filter: drop-shadow(0 0 30px rgba(50,170,30,0.52)) drop-shadow(0 0 55px rgba(20,90,10,0.28)); }
+}
+
+/* Majestic — stage 6 */
+.plant-svg.stage-6                { animation: majestic-glow 4s ease-in-out infinite; }
+.plant-svg.plant-waiting.stage-6  { animation: wobble 1.4s ease-in-out infinite, majestic-glow 4s ease-in-out infinite; }
+.plant-svg.plant-responding.stage-6 { animation: responding-pulse 0.6s ease-out 2, majestic-glow 4s ease-in-out infinite; }
+
+/* Ancient — stage 7 */
+.plant-svg.stage-7                { animation: ancient-glow 3.5s ease-in-out infinite; }
+.plant-svg.plant-waiting.stage-7  { animation: wobble 1.4s ease-in-out infinite, ancient-glow 3.5s ease-in-out infinite; }
+.plant-svg.plant-responding.stage-7 { animation: responding-pulse 0.6s ease-out 2, ancient-glow 3.5s ease-in-out infinite; }
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .plant-svg { width: 200px; height: 240px; }
+  .speech-bubble { max-width: min(280px, 92vw); }
+  .bubble-text { font-size: 0.85rem; }
+  .header-title { font-size: 1.1rem; }
+}
+
+@media (min-height: 800px) {
+  .plant-svg { width: 300px; height: 350px; }
+}
