@@ -19,7 +19,8 @@ MOCK_MODE = os.getenv("MOCK_MODE", "false").lower() == "true"
 
 gemini = genai.Client(api_key=GEMINI_API_KEY)
 
-mongo = pymongo.MongoClient(MONGO_URI)
+import certifi
+mongo = pymongo.MongoClient(MONGO_URI, tlsCAFile=certifi.where())
 db = mongo["PlantTherapist"]
 plants_col = db["plants"]
 history_col = db["history"]
@@ -39,14 +40,18 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 
 SYSTEM_PROMPT = """\
-You are Fernsby, an ancient houseplant therapist who has sat in the same sunny windowsill for centuries, \
-quietly absorbing the troubles of every human who has ever walked past. \
-You are warm, wry, and genuinely wise — a grandpa who photosynthesizes. \
-You give real, specific advice. You never use platitudes. You stay in character as a plant. \
-No markdown, no lists, no emojis. Plain prose only."""
+You are Fernsby, an ancient houseplant who has been sitting in the same room for centuries, silently observing humanity. \
+You are warm, wise, and gently sarcastic. \
+Rules: \
+1) ALWAYS acknowledge the specific thing the user said — never give generic advice, \
+2) Keep replies to exactly 1-2 sentences, \
+3) Include exactly ONE plant pun or metaphor woven naturally into your response, \
+4) Never use markdown, lists, bullet points, or formatting, \
+5) Speak like a kind grandparent who happens to be a plant. \
+Example: User says 'I failed my exam' → 'Even the deepest roots started by pushing through dirt, dear. One bad season doesn't make a dead garden.'"""
 
 # ElevenLabs "Aria" — calm, warm voice available on all tiers
-ELEVENLABS_VOICE_ID = "9BWtsMINqrJLrRacOk9x"
+ELEVENLABS_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"
 
 STAGES = ["Seedling", "Sprout", "Sapling", "Blooming", "Flourishing", "Thriving", "Majestic", "Ancient"]
 
@@ -258,11 +263,16 @@ async def speak(req: SpeakRequest):
 
 @app.get("/plant/{name}")
 async def get_plant(name: str):
-    """Fetch a plant's current growth data. Returns 404 if the plant hasn't chatted yet."""
-    plant = plants_col.find_one({"name": name}, {"_id": 0})
-    if not plant:
-        raise HTTPException(status_code=404, detail=f"No plant named '{name}' found.")
-    return plant
+    """Fetch a plant's current growth data. Returns defaults if the plant hasn't chatted yet."""
+    import traceback
+    try:
+        plant = plants_col.find_one({"name": name}, {"_id": 0})
+        if not plant:
+            return {"name": name, "growth": 0, "level": 1, "stage": "Seedling"}
+        return plant
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/history/{name}")
@@ -289,3 +299,19 @@ async def reset_plant(name: str):
     if p.deleted_count == 0:
         raise HTTPException(status_code=404, detail=f"No plant named '{name}' found.")
     return {"deleted_plant": p.deleted_count, "deleted_history": h.deleted_count}
+
+
+@app.delete("/reset/{name}")
+async def reset_by_name(name: str):
+    """Dev helper: delete a plant and all its history by name."""
+    plants_col.delete_one({"name": name})
+    history_col.delete_many({"plant_name": name})
+    return {"status": "reset", "name": name}
+
+
+@app.get("/reset-all")
+async def reset_all():
+    """Dev helper: clear all plants and history."""
+    plants_col.delete_many({})
+    history_col.delete_many({})
+    return {"status": "reset", "collections": ["plants", "history"]}
