@@ -9,7 +9,7 @@
   background: radial-gradient(ellipse at 60% 0%, #1a3a1a 0%, #0d1f0d 40%, #080f08 100%);
   color: #d4e8c2;
   font-family: 'Georgia', 'Times New Roman', serif;
-  overflow-x: hidden;
+  overflow-x: clip; /* clip (not hidden) so overflow-y stays visible — hidden would force overflow-y:auto and clip the canopy */
   position: relative;
 }
 
@@ -49,6 +49,40 @@
 
 .leaf-icon { font-size: 1.5rem; }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.reset-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: rgba(200,230,160,0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+
+.reset-btn svg { width: 14px; height: 14px; }
+
+.app-header:hover .reset-btn {
+  opacity: 1;
+}
+
+.reset-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: rgba(200,230,160,0.9);
+}
+
 .stage-badge {
   font-size: 0.75rem;
   font-family: system-ui, sans-serif;
@@ -83,8 +117,11 @@
   align-items: flex-end;
   justify-content: center;
   width: 100%;
-  min-height: 0;
+  flex: 1;           /* fill available space so canopy has room to grow upward */
+  min-height: 260px;
   overflow: visible;
+  isolation: isolate; /* new stacking context: plant-svg stays below speech-bubble */
+  z-index: 1;         /* lower than speech-bubble z-index:100 */
 }
 
 /* ── Plant SVG ────────────────────────────────────────────── */
@@ -143,6 +180,7 @@
   transition: opacity 0.38s ease, transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   z-index: 100;
+  margin-bottom: -22px; /* close gap + overlap plant canopy so tail connects */
 }
 
 .bubble-visible {

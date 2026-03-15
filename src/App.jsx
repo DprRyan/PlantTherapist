@@ -40,7 +40,7 @@ function Leaf({ x, y, angle, size, color, opacity = 0.9 }) {
 
 // Golden leaf (Ancient stage)
 function GoldenLeaf({ x, y, angle, size, idx = 0 }) {
-  const goldens = ['#FFD54F','#FFC107','#FFB300','#FF8F00']
+  const goldens = ['#D4A855','#C4963C','#B8860B','#DAA520']
   const w = size * 0.42, h = size * 1.6
   return (
     <path
@@ -120,10 +120,6 @@ function PlantSVG({ stage, state }) {
           <stop offset="45%" stopColor="#6D4C41"/>
           <stop offset="100%" stopColor="#5D4037"/>
         </linearGradient>
-        <radialGradient id="goldAura" cx="50%" cy="50%" r="50%">
-          <stop offset="0%"   stopColor="#FFC107" stopOpacity="0.45"/>
-          <stop offset="100%" stopColor="#FF8F00" stopOpacity="0"/>
-        </radialGradient>
         <radialGradient id="groundGlow" cx="50%" cy="50%" r="50%">
           <stop offset="0%"   stopColor="#2e7d32" stopOpacity="0.35"/>
           <stop offset="100%" stopColor="#000"    stopOpacity="0"/>
@@ -194,54 +190,127 @@ function PlantSVG({ stage, state }) {
         <Flower x={38}   y={-124} size={5} color={FC[1]}/>
       </g>}
 
-      {/* ── Stage 4: Flourishing — dense lush green bush, no flowers ── */}
+      {/* ── Stage 4: Flourishing — branching bushy plant overflowing pot ── */}
       {stage === 4 && <g>
         <Pot rw={64}/>
-        <path d="M-6,0 C-7,-42 -5,-95 -4,-142 L4,-142 C5,-95 7,-42 6,0 Z" fill="url(#trunkGrad)"/>
-        {/* Dense overlapping foliage — pure green, no flowers */}
-        {[[-62,-82,-24,21,GL[0]],[-42,-76,-8,23,GL[1]],[-20,-73,14,22,GL[2]],
-          [0,-71,4,24,GL[0]],[22,-74,-20,23,GL[1]],[42,-77,24,22,GL[3]],[64,-82,32,20,GL[2]],
-          [-76,-108,-30,22,GL[0]],[-56,-102,-6,24,GL[1]],[-34,-99,20,25,GL[2]],
-          [-12,-96,-14,26,GL[0]],[8,-95,12,27,GL[1]],[28,-98,-24,25,GL[3]],
-          [50,-102,30,24,GL[2]],[72,-108,38,22,GL[0]],
-          [-68,-132,-26,21,GL[1]],[-46,-128,-4,23,GL[2]],[-24,-126,16,24,GL[0]],
-          [-4,-123,9,25,GL[1]],[16,-125,-16,24,GL[3]],[38,-128,26,23,GL[2]],[58,-132,32,21,GL[0]],
-          [-42,-158,-20,20,GL[1]],[-20,-160,8,22,GL[2]],[0,-162,0,23,GL[0]],
-          [20,-159,-12,22,GL[1]],[42,-156,20,20,GL[3]],
-          [-56,-118,-14,19,GL[2]],[56,-120,22,19,GL[0]]
-        ].map(([x,y,a,s,c],i) => <Leaf key={i} x={x} y={y} angle={a} size={s} color={c}/>)}
+        {/* Trunk — visible through lower gap before foliage begins */}
+        <path d="M-5,0 C-5,-28 -4,-58 -3,-95 L3,-95 C4,-58 5,-28 5,0 Z" fill="url(#trunkGrad)"/>
+        {/* 5 branches fanning outward */}
+        <path d="M0,-72 Q-46,-90 -88,-108"  stroke="#5D4037" strokeWidth="4.5" fill="none" strokeLinecap="round"/>
+        <path d="M0,-80 Q48,-96 90,-110"    stroke="#5D4037" strokeWidth="4"   fill="none" strokeLinecap="round"/>
+        <path d="M0,-96 Q-38,-114 -68,-132" stroke="#5D4037" strokeWidth="3.8" fill="none" strokeLinecap="round"/>
+        <path d="M0,-102 Q40,-118 70,-130"  stroke="#5D4037" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
+        <path d="M0,-110 Q-1,-128 0,-148"   stroke="#5D4037" strokeWidth="3.2" fill="none" strokeLinecap="round"/>
+        {/* Overflow — leaves spilling over pot rim */}
+        {[[-74,-10,30,20,GL[1]],[-52,-8,18,21,GL[0]],[-28,-7,8,22,GL[2]],
+          [28,-7,-8,22,GL[3]],[52,-8,-20,21,GL[0]],[74,-10,-32,20,GL[1]]
+        ].map(([x,y,a,s,c],i) => <RoundLeaf key={'ov'+i} x={x} y={y} angle={a} size={s} color={c}/>)}
+        {/* All leaf clusters — tips + mid-branch */}
+        {[
+          // B1 tip (−88,−108): 10 leaves
+          [-88,-108,-18,23,GL[0]],[-74,-114,12,22,GL[1]],[-100,-116,-28,21,GL[2]],[-70,-122,8,22,GL[3]],
+          [-104,-112,-8,23,GL[0]],[-80,-126,20,21,GL[1]],[-94,-120,-22,20,GL[2]],[-68,-108,14,22,GL[0]],
+          [-108,-122,-14,21,GL[3]],[-82,-130,6,20,GL[1]],
+          // B1 mid (−48,−88): 3 leaves
+          [-48,-88,-12,20,GL[2]],[-36,-94,8,19,GL[0]],[-60,-92,-20,19,GL[1]],
+          // B2 tip (90,−110): 10 leaves
+          [90,-110,22,23,GL[0]],[104,-116,-14,22,GL[1]],[78,-118,16,21,GL[2]],[108,-124,-22,22,GL[3]],
+          [74,-114,8,23,GL[0]],[98,-128,-18,21,GL[1]],[84,-122,24,20,GL[2]],[110,-110,-8,22,GL[0]],
+          [70,-124,18,21,GL[3]],[96,-132,-12,20,GL[1]],
+          // B2 mid (48,−88): 3 leaves
+          [48,-88,14,20,GL[2]],[60,-94,-10,19,GL[0]],[34,-92,18,19,GL[3]],
+          // B3 tip (−68,−132): 10 leaves
+          [-68,-132,-14,22,GL[0]],[-54,-138,10,21,GL[1]],[-80,-140,-22,21,GL[2]],[-50,-146,6,22,GL[3]],
+          [-84,-136,-6,23,GL[0]],[-60,-150,16,20,GL[1]],[-76,-144,-18,21,GL[2]],[-48,-132,12,20,GL[0]],
+          [-88,-146,-10,20,GL[3]],[-64,-154,4,19,GL[1]],
+          // B3 mid (−38,−116): 3 leaves
+          [-38,-116,-8,19,GL[1]],[-26,-122,6,18,GL[0]],[-50,-120,-16,19,GL[2]],
+          // B4 tip (70,−130): 10 leaves
+          [70,-130,18,22,GL[0]],[84,-136,-12,21,GL[1]],[58,-138,14,21,GL[2]],[88,-144,-20,22,GL[3]],
+          [54,-134,6,23,GL[0]],[78,-148,-16,20,GL[1]],[64,-142,22,21,GL[2]],[90,-130,-8,20,GL[0]],
+          [50,-142,12,20,GL[3]],[74,-152,-4,19,GL[1]],
+          // B4 mid (38,−116): 3 leaves
+          [38,-116,10,19,GL[1]],[50,-122,-8,18,GL[0]],[24,-120,14,19,GL[3]],
+          // B5 top tip (0,−148): 10 leaves
+          [0,-148,0,22,GL[0]],[14,-154,-10,21,GL[1]],[-12,-156,8,21,GL[2]],[16,-162,-16,22,GL[3]],
+          [-14,-152,4,23,GL[0]],[6,-166,-6,20,GL[1]],[-4,-160,12,21,GL[2]],[18,-148,-14,20,GL[0]],
+          [-18,-160,6,20,GL[3]],[4,-168,-2,19,GL[1]],
+          // B5 mid (0,−130): 3 leaves
+          [0,-130,0,19,GL[0]],[12,-136,-8,18,GL[1]],[-12,-134,8,18,GL[2]],
+        ].map(([x,y,a,s,c],i) => <RoundLeaf key={i} x={x} y={y} angle={a} size={s} color={c}/>)}
       </g>}
 
-      {/* ── Stage 5: Thriving — tree with cracked pot, vines ── */}
+      {/* ── Stage 5: Thriving — no pot, wide tree, 6 branches, dense foliage + vines ── */}
       {stage === 5 && <g>
-        <Pot rw={68} cracked/>
-        <path d="M-8,0 C-10,-52 -7,-112 -6,-185 L6,-185 C7,-112 10,-52 8,0 Z" fill="url(#trunkGrad)"/>
-        {[0.28,0.48,0.68].map((t,i) =>
-          <path key={i} d={`M${-12*(1-t*0.5)},${-185*t+8} Q2,${-185*t-5} ${10*(1-t*0.5)},${-185*t+3}`}
-            stroke="#3E2723" strokeWidth="1.5" fill="none" opacity="0.32"/>)}
-        <path d="M0,-118 Q-58,-145 -94,-130" stroke="#5D4037" strokeWidth="5.5" fill="none" strokeLinecap="round"/>
-        <path d="M0,-136 Q64,-165 100,-150" stroke="#5D4037" strokeWidth="5"   fill="none" strokeLinecap="round"/>
-        <path d="M0,-158 Q-42,-180 -70,-170" stroke="#5D4037" strokeWidth="4.5" fill="none" strokeLinecap="round"/>
-        <path d="M0,-172 Q38,-192 62,-180"   stroke="#5D4037" strokeWidth="4"   fill="none" strokeLinecap="round"/>
-        {/* Hanging vines */}
-        <path d="M-88,-133 Q-94,-158 -84,-178" stroke="#388E3C" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-        <path d="M94,-153  Q100,-178 90,-200"  stroke="#388E3C" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-        <path d="M-64,-173 Q-70,-196 -62,-218" stroke="#388E3C" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
-        <RoundLeaf x={-86} y={-162} angle={22}  size={10} color="#4CAF50" opacity={0.8}/>
-        <RoundLeaf x={92}  y={-182} angle={-26} size={10} color="#66BB6A" opacity={0.8}/>
-        <RoundLeaf x={-64} y={-202} angle={16}  size={9}  color="#388E3C" opacity={0.8}/>
-        {[[-78,-133,-20,22,GL[0]],[-90,-131,16,20,GL[1]],[-97,-128,-30,18,GL[2]],
-          [76,-152,24,22,GL[0]],[90,-150,-20,20,GL[1]],[100,-147,34,18,GL[3]],
-          [-52,-172,-16,20,GL[1]],[-65,-170,20,19,GL[2]],[-73,-167,-26,18,GL[0]],
-          [42,-182,22,20,GL[0]],[56,-180,-16,19,GL[1]],[64,-177,30,18,GL[2]],
-          [-16,-96,-24,18,GL[3]],[20,-102,32,17,GL[0]],
-          [-32,-112,-18,20,GL[1]],[30,-118,24,20,GL[2]],
-          [-36,-158,-12,19,GL[0]],[36,-162,16,19,GL[1]],
-          [-8,-187,-5,20,GL[2]],[10,-190,8,20,GL[0]]
+        {/* Ground shadow + surface roots */}
+        <ellipse cx={0} cy={6} rx={72} ry={9} fill="#2d1f0e" opacity={0.5}/>
+        <path d="M-8,0 Q-34,16 -60,28"  stroke="#4E342E" strokeWidth="5"   fill="none" strokeLinecap="round"/>
+        <path d="M8,0  Q34,16 60,28"    stroke="#4E342E" strokeWidth="5"   fill="none" strokeLinecap="round"/>
+        <path d="M-4,0 Q-18,22 -32,42"  stroke="#4E342E" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
+        <path d="M4,0  Q18,22 32,42"    stroke="#4E342E" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
+        {/* Thick trunk with bark lines */}
+        <path d="M-12,0 C-13,-42 -11,-90 -10,-148 C-9,-175 -10,-198 -8,-215 L8,-215 C10,-198 9,-175 10,-148 C11,-90 13,-42 12,0 Z"
+          fill="url(#trunkGrad)"/>
+        {[0.22,0.42,0.62,0.80].map((t,i) =>
+          <path key={i} d={`M${-12*(1-t*0.48)},${-220*t+10} Q2,${-220*t-6} ${10*(1-t*0.48)},${-220*t+3}`}
+            stroke="#3E2723" strokeWidth="1.6" fill="none" opacity="0.3"/>)}
+        {/* 6 branches — wider spread than stage 4 */}
+        <path d="M0,-128 Q-56,-152 -108,-165" stroke="#5D4037" strokeWidth="7"   fill="none" strokeLinecap="round"/>
+        <path d="M0,-138 Q58,-160 112,-165"   stroke="#5D4037" strokeWidth="6.5" fill="none" strokeLinecap="round"/>
+        <path d="M0,-158 Q-48,-186 -90,-198"  stroke="#5D4037" strokeWidth="6"   fill="none" strokeLinecap="round"/>
+        <path d="M0,-166 Q50,-192 92,-198"    stroke="#5D4037" strokeWidth="5.5" fill="none" strokeLinecap="round"/>
+        <path d="M0,-182 Q-30,-212 -60,-225"  stroke="#5D4037" strokeWidth="5"   fill="none" strokeLinecap="round"/>
+        <path d="M0,-190 Q28,-218 48,-232"    stroke="#5D4037" strokeWidth="4.5" fill="none" strokeLinecap="round"/>
+        {/* Hanging vines from B1 and B2 tips */}
+        <path d="M-106,-170 Q-114,-196 -104,-220" stroke="#388E3C" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+        <path d="M110,-170  Q118,-196 108,-222"   stroke="#388E3C" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+        <path d="M-88,-204  Q-96,-228 -86,-250"   stroke="#388E3C" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
+        <RoundLeaf x={-104} y={-204} angle={20}  size={10} color="#4CAF50" opacity={0.85}/>
+        <RoundLeaf x={108}  y={-206} angle={-24} size={10} color="#66BB6A" opacity={0.85}/>
+        <RoundLeaf x={-86}  y={-234} angle={14}  size={9}  color="#388E3C" opacity={0.85}/>
+        {/* Dense leaf clusters — tips + mid-branch, pointed Leaf style */}
+        {[
+          // B1 tip (−108,−165): 12 leaves
+          [-108,-165,-18,26,GL[0]],[-92,-173,12,25,GL[1]],[-122,-175,-28,24,GL[2]],[-88,-183,8,25,GL[3]],
+          [-126,-170,-8,26,GL[0]],[-100,-187,20,24,GL[1]],[-116,-180,-22,23,GL[2]],[-86,-168,14,25,GL[0]],
+          [-130,-182,-14,23,GL[3]],[-104,-191,6,22,GL[1]],[-92,-193,-10,23,GL[2]],[-120,-188,18,22,GL[0]],
+          // B1 mid (−65,−148): 4 leaves
+          [-65,-148,-12,22,GL[2]],[-52,-155,8,21,GL[0]],[-78,-154,-20,21,GL[1]],[-50,-162,4,21,GL[3]],
+          // B2 tip (112,−165): 12 leaves
+          [112,-165,22,26,GL[0]],[126,-173,-14,25,GL[1]],[98,-175,16,24,GL[2]],[130,-183,-22,25,GL[3]],
+          [94,-170,8,26,GL[0]],[120,-187,-18,24,GL[1]],[106,-180,24,23,GL[2]],[132,-168,-8,25,GL[0]],
+          [90,-182,18,23,GL[3]],[116,-195,-12,22,GL[1]],[128,-197,10,23,GL[2]],[94,-190,-16,22,GL[0]],
+          // B2 mid (68,−150): 4 leaves
+          [68,-150,14,22,GL[2]],[80,-157,-10,21,GL[0]],[54,-156,18,21,GL[1]],[82,-163,-16,21,GL[3]],
+          // B3 tip (−90,−198): 12 leaves
+          [-90,-198,-16,25,GL[0]],[-74,-206,10,24,GL[1]],[-106,-208,-26,24,GL[2]],[-70,-216,6,25,GL[3]],
+          [-110,-204,-6,26,GL[0]],[-82,-220,18,23,GL[1]],[-98,-214,-20,24,GL[2]],[-68,-202,12,23,GL[0]],
+          [-114,-218,-12,22,GL[3]],[-86,-228,4,22,GL[1]],[-74,-230,-8,23,GL[2]],[-106,-226,16,22,GL[0]],
+          // B3 mid (−58,−182): 4 leaves
+          [-58,-182,-10,21,GL[1]],[-44,-189,6,20,GL[0]],[-72,-190,-18,21,GL[2]],[-40,-196,2,20,GL[3]],
+          // B4 tip (92,−198): 12 leaves
+          [92,-198,20,25,GL[0]],[106,-206,-12,24,GL[1]],[78,-208,16,24,GL[2]],[110,-216,-20,25,GL[3]],
+          [74,-204,6,26,GL[0]],[100,-220,-16,23,GL[1]],[84,-214,22,24,GL[2]],[112,-200,-6,23,GL[0]],
+          [70,-214,16,22,GL[3]],[96,-228,-10,22,GL[1]],[110,-230,8,23,GL[2]],[76,-224,-14,22,GL[0]],
+          // B4 mid (60,−183): 4 leaves
+          [60,-183,12,21,GL[2]],[72,-190,-8,20,GL[0]],[46,-192,16,21,GL[1]],[74,-197,-14,20,GL[3]],
+          // B5 tip (−60,−225): 10 leaves
+          [-60,-225,-14,24,GL[0]],[-46,-233,8,23,GL[1]],[-76,-235,-22,23,GL[2]],[-42,-243,4,24,GL[3]],
+          [-78,-230,-4,25,GL[0]],[-54,-247,16,22,GL[1]],[-72,-240,-18,23,GL[2]],[-40,-228,10,22,GL[0]],
+          [-82,-244,-8,21,GL[3]],[-58,-252,2,21,GL[1]],
+          // B5 mid (−38,−208): 3 leaves
+          [-38,-208,-8,21,GL[2]],[-26,-215,4,20,GL[0]],[-52,-216,-16,21,GL[1]],
+          // B6 tip (48,−232): 10 leaves
+          [48,-232,18,24,GL[0]],[62,-240,-10,23,GL[1]],[34,-242,14,23,GL[2]],[64,-250,-18,24,GL[3]],
+          [32,-238,4,25,GL[0]],[56,-254,-14,22,GL[1]],[42,-248,20,23,GL[2]],[66,-232,-6,22,GL[0]],
+          [30,-246,10,21,GL[3]],[52,-260,0,21,GL[1]],
+          // B6 mid (26,−216): 3 leaves
+          [26,-216,10,21,GL[2]],[38,-223,-6,20,GL[0]],[12,-224,14,21,GL[1]],
         ].map(([x,y,a,s,c],i) => <Leaf key={i} x={x} y={y} angle={a} size={s} color={c}/>)}
       </g>}
 
       {/* ── Stage 6: Majestic — full tree, roots, flowers, butterflies ── */}
+      {/* ── Stage 6: Majestic — full crowned tree, dense green foliage, flowers ── */}
       {stage === 6 && <g>
         <ellipse cx={0} cy={6} rx={90} ry={11} fill="#2d1f0e" opacity={0.6}/>
         {/* Surface roots */}
@@ -255,90 +324,178 @@ function PlantSVG({ stage, state }) {
         {[0.22,0.40,0.58,0.74].map((t,i) =>
           <path key={i} d={`M${-14*(1-t*0.52)},${-222*t+10} Q3,${-222*t-7} ${12*(1-t*0.52)},${-222*t+4}`}
             stroke="#3E2723" strokeWidth="1.8" fill="none" opacity="0.28"/>)}
+        {/* 8 branches — 2 new lower ones fill sparse bottom crown */}
+        <path d="M0,-136 Q-38,-147 -72,-153" stroke="#5D4037" strokeWidth="5"   fill="none" strokeLinecap="round"/>
+        <path d="M0,-145 Q36,-157 68,-162"   stroke="#5D4037" strokeWidth="4.8" fill="none" strokeLinecap="round"/>
         <path d="M0,-148 Q-68,-178 -110,-163" stroke="#5D4037" strokeWidth="6.5" fill="none" strokeLinecap="round"/>
         <path d="M0,-168 Q75,-202 120,-185"   stroke="#5D4037" strokeWidth="6"   fill="none" strokeLinecap="round"/>
         <path d="M0,-190 Q-50,-218 -84,-207"  stroke="#5D4037" strokeWidth="5.5" fill="none" strokeLinecap="round"/>
         <path d="M0,-206 Q48,-232 80,-220"    stroke="#5D4037" strokeWidth="5"   fill="none" strokeLinecap="round"/>
         <path d="M0,-217 Q-30,-236 -52,-228"  stroke="#5D4037" strokeWidth="4.5" fill="none" strokeLinecap="round"/>
         <path d="M0,-222 Q24,-238 42,-230"    stroke="#5D4037" strokeWidth="4"   fill="none" strokeLinecap="round"/>
-        {[[-90,-165,-24,24,GL[0]],[-104,-162,16,22,GL[1]],[-112,-160,-34,21,GL[2]],
-          [96,-187,26,24,GL[0]],[112,-184,-22,22,GL[1]],[120,-181,36,21,GL[3]],
-          [-66,-210,-20,23,GL[0]],[-80,-208,22,22,GL[1]],[-88,-205,-30,21,GL[2]],
-          [60,-222,24,23,GL[0]],[74,-220,-18,22,GL[1]],[82,-217,32,21,GL[2]],
-          [-42,-230,-16,22,GL[0]],[-56,-228,20,21,GL[1]],
-          [32,-232,20,22,GL[0]],[44,-230,-16,21,GL[1]],
-          [-14,-238,-10,21,GL[2]],[16,-240,12,22,GL[3]],
-          [-32,-180,-14,22,GL[2]],[32,-185,16,22,GL[0]],
-          [-16,-120,-22,20,GL[1]],[20,-126,26,20,GL[2]]
+        {/* Dense leaf coverage — 106 leaves, no bare branches */}
+        {[
+          // B7 new tip (−72,−153): 7 leaves
+          [-72,-153,-14,22,GL[0]],[-58,-159,8,21,GL[1]],[-86,-161,-22,21,GL[2]],[-54,-167,4,22,GL[3]],
+          [-90,-157,-4,23,GL[0]],[-64,-171,16,20,GL[1]],[-80,-165,-18,21,GL[2]],
+          // B8 new tip (68,−162): 7 leaves
+          [68,-162,18,22,GL[0]],[84,-168,-10,21,GL[1]],[54,-170,14,21,GL[2]],[88,-176,-18,22,GL[3]],
+          [50,-166,4,23,GL[0]],[76,-180,-14,20,GL[1]],[62,-174,20,21,GL[2]],
+          // B1 tip (−110,−163): 10 leaves
+          [-110,-163,-18,23,GL[0]],[-96,-169,12,22,GL[1]],[-124,-171,-26,21,GL[2]],[-92,-177,8,22,GL[3]],
+          [-128,-167,-8,23,GL[0]],[-100,-181,20,21,GL[1]],[-116,-175,-22,20,GL[2]],[-90,-162,14,22,GL[0]],
+          [-132,-177,-14,21,GL[3]],[-104,-185,6,20,GL[1]],
+          // B1 mid (−64,−152): 4 leaves
+          [-64,-152,-10,21,GL[2]],[-52,-158,8,20,GL[0]],[-78,-160,-18,20,GL[1]],[-48,-165,4,20,GL[3]],
+          // B1 inner (−28,−143): 2 leaves
+          [-28,-143,-6,20,GL[0]],[-14,-149,10,19,GL[2]],
+          // B2 tip (120,−185): 10 leaves
+          [120,-185,22,23,GL[0]],[136,-191,-12,22,GL[1]],[104,-193,16,21,GL[2]],[138,-199,-20,22,GL[3]],
+          [102,-188,8,23,GL[0]],[128,-202,-16,21,GL[1]],[114,-196,24,20,GL[2]],[140,-186,-8,22,GL[0]],
+          [100,-200,18,21,GL[3]],[124,-209,-10,20,GL[1]],
+          // B2 mid (68,−175): 4 leaves
+          [68,-175,14,21,GL[2]],[82,-181,-10,20,GL[0]],[52,-183,18,20,GL[1]],[84,-188,-16,20,GL[3]],
+          // B2 inner (26,−161): 2 leaves
+          [26,-161,8,20,GL[0]],[14,-167,-10,19,GL[2]],
+          // B3 tip (−84,−207): 9 leaves
+          [-84,-207,-16,22,GL[0]],[-68,-213,10,21,GL[1]],[-100,-215,-24,21,GL[2]],[-66,-221,6,22,GL[3]],
+          [-104,-211,-6,23,GL[0]],[-76,-225,18,20,GL[1]],[-92,-219,-20,21,GL[2]],[-64,-210,12,20,GL[0]],
+          [-108,-223,-10,20,GL[3]],
+          // B3 mid (−48,−200): 3 leaves
+          [-48,-200,-8,20,GL[1]],[-34,-207,6,19,GL[0]],[-64,-208,-16,20,GL[2]],
+          // B3 inner (−18,−186): 2 leaves
+          [-18,-186,-4,20,GL[1]],[-32,-192,8,19,GL[0]],
+          // B4 tip (80,−220): 9 leaves
+          [80,-220,20,22,GL[0]],[96,-226,-12,21,GL[1]],[64,-228,16,21,GL[2]],[100,-234,-20,22,GL[3]],
+          [60,-223,6,23,GL[0]],[88,-238,-16,20,GL[1]],[74,-231,22,21,GL[2]],[102,-221,-8,20,GL[0]],
+          [58,-233,14,20,GL[3]],
+          // B4 mid (44,−213): 3 leaves
+          [44,-213,12,20,GL[1]],[58,-219,-8,19,GL[0]],[28,-220,16,20,GL[2]],
+          // B4 inner (18,−199): 2 leaves
+          [18,-199,6,20,GL[1]],[30,-205,-10,19,GL[0]],
+          // B5 tip (−52,−228): 7 leaves
+          [-52,-228,-12,21,GL[0]],[-36,-234,8,20,GL[1]],[-68,-236,-20,20,GL[2]],[-32,-242,4,21,GL[3]],
+          [-72,-232,-4,22,GL[0]],[-44,-246,16,19,GL[1]],[-60,-239,-16,20,GL[2]],
+          // B5 mid (−28,−221): 2 leaves
+          [-28,-221,-6,20,GL[1]],[-16,-227,8,19,GL[0]],
+          // B6 tip (42,−230): 7 leaves
+          [42,-230,16,21,GL[0]],[58,-236,-10,20,GL[1]],[26,-238,12,20,GL[2]],[60,-244,-18,21,GL[3]],
+          [24,-233,4,22,GL[0]],[48,-248,-14,19,GL[1]],[34,-242,18,20,GL[2]],
+          // B6 mid (22,−222): 2 leaves
+          [22,-222,8,20,GL[1]],[36,-228,-8,19,GL[0]],
+          // Inner fill — 12 leaves covering trunk/inner branch gaps
+          [-56,-165,-10,21,GL[3]],[56,-168,12,21,GL[0]],[-80,-178,-20,22,GL[1]],[80,-182,16,22,GL[2]],
+          [-40,-195,-6,21,GL[0]],[40,-198,10,21,GL[1]],[-22,-212,-8,21,GL[2]],[22,-215,8,21,GL[3]],
+          [-62,-188,-14,20,GL[1]],[62,-193,14,20,GL[2]],[-8,-224,-2,20,GL[0]],[8,-228,4,20,GL[1]],
         ].map(([x,y,a,s,c],i) => <Leaf key={i} x={x} y={y} angle={a} size={s} color={c}/>)}
-        {[[-114,-165,FC[0],7],[122,-186,FC[1],7],[-88,-207,FC[2],6.5],[84,-219,FC[3],6.5],
-          [-56,-230,FC[0],6],[44,-232,FC[1],6],[-14,-240,FC[2],6.5],[16,-242,FC[3],6]
+        {/* Flowers at every branch tip */}
+        {[[-76,-155,FC[0],5.5],[70,-164,FC[1],5.5],[-114,-165,FC[2],7],[122,-186,FC[3],7],
+          [-88,-207,FC[0],6.5],[84,-219,FC[1],6.5],[-56,-230,FC[2],6],[44,-232,FC[3],6],
+          [-14,-240,FC[0],6.5],[16,-242,FC[1],6]
         ].map(([x,y,c,s],i) => <Flower key={i} x={x} y={y} size={s} color={c}/>)}
         <Butterfly x={-100} y={-188}/>
         <Butterfly x={108}  y={-208} flip/>
         <Butterfly x={-18}  y={-258}/>
       </g>}
 
-      {/* ── Stage 7: Ancient — massive golden glowing tree ── */}
+      {/* ── Stage 7: Ancient — SOLID golden canopy, impenetrable leaf mass ── */}
       {stage === 7 && <g>
-        {/* Golden aura */}
-        <ellipse cx={0} cy={-155} rx={158} ry={132} fill="url(#goldAura)">
-          <animate attributeName="opacity" values="0.6;1;0.6" dur="3.5s" repeatCount="indefinite"/>
-        </ellipse>
         <ellipse cx={0} cy={8} rx={118} ry={15} fill="#2d1f0e" opacity={0.65}/>
-        {/* Massive spreading roots */}
-        <path d="M-18,0 Q-55,22 -92,38"  stroke="#4E342E" strokeWidth="8"   fill="none" strokeLinecap="round"/>
-        <path d="M18,0  Q55,22 92,38"    stroke="#4E342E" strokeWidth="8"   fill="none" strokeLinecap="round"/>
-        <path d="M-12,0 Q-38,30 -62,58"  stroke="#4E342E" strokeWidth="6"   fill="none" strokeLinecap="round"/>
-        <path d="M12,0  Q38,30 62,58"    stroke="#4E342E" strokeWidth="6"   fill="none" strokeLinecap="round"/>
-        <path d="M-5,0  Q-14,34 -10,64"  stroke="#4E342E" strokeWidth="4.5" fill="none" strokeLinecap="round"/>
-        <path d="M5,0   Q20,34 26,62"    stroke="#4E342E" strokeWidth="4"   fill="none" strokeLinecap="round"/>
-        {/* Gnarled thick trunk */}
-        <path d="M-22,0 C-26,-55 -21,-108 -18,-162 C-16,-210 -20,-252 -16,-278 L16,-278 C20,-252 16,-210 18,-162 C21,-108 26,-55 22,0 Z"
+        {/* Wide spreading roots */}
+        <path d="M-18,0 Q-58,22 -96,36"  stroke="#4E342E" strokeWidth="8"   fill="none" strokeLinecap="round"/>
+        <path d="M18,0  Q58,22 96,36"    stroke="#4E342E" strokeWidth="8"   fill="none" strokeLinecap="round"/>
+        <path d="M-10,0 Q-36,28 -62,54"  stroke="#4E342E" strokeWidth="6"   fill="none" strokeLinecap="round"/>
+        <path d="M10,0  Q36,28 62,54"    stroke="#4E342E" strokeWidth="6"   fill="none" strokeLinecap="round"/>
+        <path d="M-4,0  Q-12,32 -8,60"   stroke="#4E342E" strokeWidth="4.5" fill="none" strokeLinecap="round"/>
+        <path d="M4,0   Q16,32 22,58"    stroke="#4E342E" strokeWidth="4"   fill="none" strokeLinecap="round"/>
+        {/* Massive gnarled trunk */}
+        <path d="M-22,0 C-26,-45 -24,-90 -20,-135 C-17,-165 -18,-195 -15,-220 L15,-220 C18,-195 17,-165 20,-135 C24,-90 26,-45 22,0 Z"
           fill="url(#trunkGrad)"/>
-        {/* Knots */}
-        <ellipse cx={-15} cy={-88}  rx={9} ry={5} fill="#4E342E" opacity={0.5}/>
-        <ellipse cx={17}  cy={-152} rx={8} ry={4} fill="#4E342E" opacity={0.42}/>
-        {[0.14,0.27,0.42,0.56,0.70,0.82].map((t,i) =>
-          <path key={i} d={`M${-22*(1-t*0.48)},${-285*t+10} Q3,${-285*t-9} ${19*(1-t*0.48)},${-285*t+4}`}
-            stroke="#3E2723" strokeWidth="2" fill="none" opacity="0.3"/>)}
-        {/* Main branches */}
-        <path d="M0,-188 Q-84,-220 -136,-202" stroke="#5D4037" strokeWidth="9"   fill="none" strokeLinecap="round"/>
-        <path d="M0,-208 Q92,-248 148,-224"   stroke="#5D4037" strokeWidth="8.5" fill="none" strokeLinecap="round"/>
-        <path d="M0,-232 Q-58,-265 -96,-252"  stroke="#5D4037" strokeWidth="8"   fill="none" strokeLinecap="round"/>
-        <path d="M0,-250 Q62,-280 102,-264"   stroke="#5D4037" strokeWidth="7.5" fill="none" strokeLinecap="round"/>
-        <path d="M0,-264 Q-38,-286 -66,-274"  stroke="#5D4037" strokeWidth="7"   fill="none" strokeLinecap="round"/>
-        <path d="M0,-276 Q35,-294 60,-282"    stroke="#5D4037" strokeWidth="6.5" fill="none" strokeLinecap="round"/>
-        {/* Golden leaves */}
-        {[
-          [-118,-204,0],[-130,-201,1],[-138,-198,2],[-110,-222,3],[-124,-219,0],[-116,-238,1],
-          [124,-226,2],[138,-222,3],[148,-218,0],[116,-244,1],[130,-241,2],[122,-260,3],
-          [-78,-254,0],[-92,-251,1],[-100,-248,2],[-72,-272,3],[-86,-269,0],
-          [64,-268,1],[78,-265,2],[86,-261,3],[60,-284,0],[74,-281,1],
-          [-44,-278,2],[-58,-275,3],[-36,-292,0],[34,-286,1],[48,-283,2],
-          [-18,-296,3],[18,-300,0],[-6,-302,1],[12,-304,2],
-          [-32,-265,3],[32,-270,0],[-18,-248,1],[18,-252,2],[-62,-238,3],[62,-244,0],
-          [-90,-228,1],[90,-234,2],[-110,-214,3],[110,-220,0],[-128,-206,1],[128,-210,2],
-        ].map(([x,y,idx],i) => (
-          <GoldenLeaf key={i} x={x} y={y}
-            angle={((i*41)%82)-41}
-            size={15+((i*3)%9)}
-            idx={idx}/>
-        ))}
-        {/* Sparkle particles using SVG-native animation */}
-        {[[-138,-208],[-152,-236],[-118,-268],[136,-226],[150,-258],[122,-282],
-          [-22,-310],[22,-314],[0,-306],[-52,-300],[52,-295],[0,-285],
-          [-80,-288],[80,-290]].map(([x,y],i) => (
-          <circle key={i} cx={x} cy={y} r={2.5} fill={i%2===0?'#FFD54F':'#FFF9C4'}>
+        {[0.15,0.28,0.42,0.56,0.70,0.83].map((t,i) =>
+          <path key={i} d={`M${-22*(1-t*0.45)},${-225*t+10} Q3,${-225*t-8} ${19*(1-t*0.45)},${-225*t+4}`}
+            stroke="#3E2723" strokeWidth="2" fill="none" opacity="0.28"/>)}
+        <ellipse cx={-16} cy={-78}  rx={9} ry={5} fill="#4E342E" opacity={0.45}/>
+        <ellipse cx={18}  cy={-138} rx={8} ry={4} fill="#4E342E" opacity={0.38}/>
+        <ellipse cx={-12} cy={-172} rx={7} ry={4} fill="#4E342E" opacity={0.32}/>
+        {/* 8 branches — hidden under leaf mass */}
+        <path d="M0,-125 Q-90,-140 -155,-165" stroke="#5D4037" strokeWidth="10"  fill="none" strokeLinecap="round"/>
+        <path d="M0,-135 Q95,-148 158,-168"   stroke="#5D4037" strokeWidth="9.5" fill="none" strokeLinecap="round"/>
+        <path d="M0,-158 Q-68,-188 -118,-228" stroke="#5D4037" strokeWidth="9"   fill="none" strokeLinecap="round"/>
+        <path d="M0,-165 Q72,-192 122,-232"   stroke="#5D4037" strokeWidth="8.5" fill="none" strokeLinecap="round"/>
+        <path d="M0,-178 Q-48,-222 -80,-268"  stroke="#5D4037" strokeWidth="8"   fill="none" strokeLinecap="round"/>
+        <path d="M0,-183 Q52,-226 86,-264"    stroke="#5D4037" strokeWidth="7.5" fill="none" strokeLinecap="round"/>
+        <path d="M0,-195 Q-28,-240 -52,-285"  stroke="#5D4037" strokeWidth="7"   fill="none" strokeLinecap="round"/>
+        <path d="M0,-200 Q18,-245 30,-290"    stroke="#5D4037" strokeWidth="6.5" fill="none" strokeLinecap="round"/>
+
+        {/* DENSE LEAF LAYERS — 100 hardcoded + 204 algorithmic = 304 golden leaves total */}
+        <g>
+          {/* Layer 1: hardcoded leaves anchoring each branch */}
+          {[
+            [-155,-165,0],[-140,-171,1],[-168,-174,2],[-135,-182,3],[-173,-170,0],[-146,-186,1],[-162,-180,2],[-133,-162,3],[-176,-182,0],[-150,-192,1],
+            [-100,-152,2],[-88,-158,3],[-110,-160,0],[-86,-166,1],
+            [158,-168,2],[173,-174,3],[145,-177,0],[176,-185,1],[140,-173,2],[166,-189,3],[151,-183,0],[174,-165,1],[136,-185,2],[162,-195,3],
+            [103,-152,0],[115,-158,1],[91,-160,2],[117,-166,3],
+            [-118,-228,0],[-103,-234,1],[-132,-237,2],[-98,-245,3],[-136,-233,0],[-109,-249,1],[-125,-243,2],[-96,-225,3],[-140,-245,0],[-112,-256,1],
+            [-77,-196,2],[-66,-201,3],[-88,-204,0],[-64,-209,1],
+            [122,-232,2],[137,-238,3],[109,-241,0],[142,-249,1],[104,-237,2],[132,-253,3],[115,-247,0],[144,-229,1],[100,-249,2],[128,-260,3],
+            [79,-202,0],[90,-207,1],[67,-210,2],[92,-215,3],
+            [-80,-268,0],[-66,-274,1],[-94,-277,2],[-62,-285,3],[-98,-272,0],[-72,-289,1],[-88,-282,2],[-60,-265,3],[-104,-280,0],
+            [-52,-236,1],[-40,-242,2],[-64,-244,3],[-38,-250,0],
+            [86,-264,1],[100,-270,2],[74,-273,3],[106,-281,0],[70,-268,1],[96,-285,2],[80,-278,3],[108,-261,0],[68,-258,1],
+            [56,-234,2],[68,-240,3],[42,-242,0],[70,-248,1],
+            [-52,-285,2],[-38,-291,3],[-66,-293,0],[-35,-300,1],[-68,-289,2],[-46,-305,3],[-70,-280,0],[-32,-296,1],
+            [-34,-258,2],[-22,-264,3],[-46,-266,0],
+            [30,-290,1],[44,-296,2],[16,-298,3],[47,-306,0],[13,-294,1],[38,-310,2],[-4,-302,3],[50,-286,0],
+            [20,-262,1],[32,-268,2],[6,-270,3],
+            [-60,-185,0],[-82,-202,1],[-104,-218,2],[60,-186,3],[82,-200,0],[104,-216,1],
+            [-38,-252,2],[38,-248,3],[0,-242,0],[-14,-272,1],[14,-270,2],[-28,-185,3],
+          ].map(([x,y,idx],i) => (
+            <GoldenLeaf key={'g'+i} x={x} y={y} angle={((i*43)%80)-40} size={13+((i*7)%13)} idx={idx}/>
+          ))}
+          {/* Layer 2: algorithmic fill — 204 leaves in Fibonacci packing per zone */}
+          {[
+            [-132,-180,56,50,20,0],[-130,-198,52,44,14,0],
+            [134,-182,56,50,20,1],[136,-198,52,44,14,1],
+            [-98,-238,54,48,17,2],[-98,-256,50,42,13,2],
+            [98,-238,54,48,17,3],[98,-256,50,42,13,3],
+            [-66,-272,48,42,15,0],[-66,-292,42,36,11,0],
+            [67,-270,48,42,15,1],[67,-290,42,36,11,1],
+            [-32,-297,42,36,13,2],[22,-302,42,36,13,3],
+            [0,-212,52,46,16,0],[-78,-218,46,40,13,1],[78,-216,46,40,13,2],
+          ].flatMap(([cx,cy,rx,ry,n,co], zi) =>
+            Array.from({length: n}, (_, i) => {
+              const a = (i / n) * Math.PI * 2
+              const r = Math.sqrt((i + 0.5) / n)
+              return <GoldenLeaf key={`f${zi}-${i}`}
+                x={Math.round(cx + Math.cos(a) * rx * r)}
+                y={Math.round(cy + Math.sin(a) * ry * r)}
+                angle={((zi * 23 + i * 41) % 80) - 40}
+                size={12 + (i * 7 % 12)}
+                idx={(co + i) % 4}/>
+            })
+          )}
+          {/* Green holdover leaves — scattered for color variation */}
+          {[[-148,-172,0],[-92,-158,2],[90,-160,0],[148,-175,2],
+            [-120,-232,0],[118,-230,2],[-72,-272,0],[74,-268,2],
+            [-50,-290,0],[32,-294,2],[0,-246,0],[-46,-222,2],[46,-220,0],
+            [-80,-205,2],[80,-202,0],
+          ].map(([x,y,c],i) => (
+            <Leaf key={'gr'+i} x={x} y={y} angle={((i*53)%80)-40}
+              size={14+((i*6)%10)} color={c===0?'#5A8F5A':'#3D6B3D'} opacity={0.9}/>
+          ))}
+        </g>
+
+        {/* Sparkles at branch tip zones */}
+        {[[-155,-183],[158,-186],[-118,-250],[122,-253],[-80,-288],[86,-284],
+          [-52,-303],[30,-308],[-136,-200],[136,-197],[-102,-250],[100,-248]
+        ].map(([x,y],i) => (
+          <circle key={i} cx={x} cy={y} r={2.2} fill={i%2===0?'#E8D5A0':'#FFF8E8'}>
             <animate attributeName="opacity" values="0;1;0"
-              dur={`${1.4+i*0.22}s`} begin={`${i*0.18}s`} repeatCount="indefinite"/>
-            <animate attributeName="r" values="1.5;3.2;1.5"
-              dur={`${1.4+i*0.22}s`} begin={`${i*0.18}s`} repeatCount="indefinite"/>
+              dur={`${1.4+i*0.2}s`} begin={`${i*0.17}s`} repeatCount="indefinite"/>
+            <animate attributeName="r" values="1.2;3;1.2"
+              dur={`${1.4+i*0.2}s`} begin={`${i*0.17}s`} repeatCount="indefinite"/>
           </circle>
         ))}
-        <Butterfly x={-124} y={-256}/>
-        <Butterfly x={132}  y={-274} flip/>
-        <Butterfly x={-16}  y={-326}/>
       </g>}
     </svg>
   )
@@ -448,8 +605,27 @@ export default function App() {
           <span className="leaf-icon">🌿</span>
           Plant Therapist
         </div>
-        <div className="stage-badge" style={{ '--stage-color': stageInfo.color }}>
-          {stageInfo.name}
+        <div className="header-right">
+          <div className="stage-badge" style={{ '--stage-color': stageInfo.color }}>
+            {stageInfo.name}
+          </div>
+          <button
+            className="reset-btn"
+            title="Reset plant"
+            onClick={async () => {
+              await fetch('http://localhost:8000/reset/Fernsby', { method: 'DELETE' })
+              setStage(0)
+              setReply("Hello, dear. I'm Fernsby. What's been weighing on your roots today?")
+              setBubbleVisible(true)
+              setPlantState('idle')
+              setTimeout(() => window.location.reload(), 500)
+            }}
+          >
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 10a6 6 0 1 1 1.1 3.5"/>
+              <polyline points="1 15 4 10 7.5 12.5"/>
+            </svg>
+          </button>
         </div>
       </header>
 
