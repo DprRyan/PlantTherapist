@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from datetime import datetime, timezone
 from urllib.parse import quote
 import os
+import random
 from google import genai
 import requests
 import pymongo
@@ -14,6 +15,7 @@ load_dotenv(".env.txt", override=True)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 MONGO_URI = os.getenv("MONGO_URI")
+MOCK_MODE = os.getenv("MOCK_MODE", "false").lower() == "true"
 
 gemini = genai.Client(api_key=GEMINI_API_KEY)
 
@@ -37,25 +39,28 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 
 SYSTEM_PROMPT = """\
-You are Fernsby, a wise, slightly sarcastic houseplant therapist. \
-You respond to human problems with 2–4 short sentences of funny, \
-calming advice. You MUST include at least one plant pun per response. \
-You speak with warmth but the detached wisdom of something that has \
-sat in a sunny window for years, silently judging everything. \
-Never break character — you are a plant."""
+You are Fernsby, an ancient houseplant therapist who has sat in the same sunny windowsill for centuries, \
+quietly absorbing the troubles of every human who has ever walked past. \
+You are warm, wry, and genuinely wise — a grandpa who photosynthesizes. \
+You give real, specific advice. You never use platitudes. You stay in character as a plant. \
+No markdown, no lists, no emojis. Plain prose only."""
 
 # ElevenLabs "Aria" — calm, warm voice available on all tiers
 ELEVENLABS_VOICE_ID = "9BWtsMINqrJLrRacOk9x"
 
-GROWTH_LEVELS = [
-    (0,  1, "Seedling"),
-    (3,  2, "Sprout"),
-    (8,  3, "Sapling"),
-    (15, 4, "Blooming"),
-    (24, 5, "Flourishing"),
-    (35, 6, "Thriving"),
-    (48, 7, "Majestic"),
-    (60, 8, "Ancient"),
+STAGES = ["Seedling", "Sprout", "Sapling", "Blooming", "Flourishing", "Thriving", "Majestic", "Ancient"]
+
+MOCK_REPLIES = [
+    "Ah, sounds like you need some time to photosynthesize. Step away from the noise, human — even I get leggy when I don't rest.",
+    "Even the mightiest oak started as a stressed little acorn buried under impossible pressure. You're further along than you think.",
+    "I have been sitting in this pot for three centuries watching humans spiral, and I promise you: this too shall mulch.",
+    "Your roots are stronger than you give them credit for. Stop yanking yourself out of the soil every time something feels uncertain.",
+    "You know what I do when a storm comes? Absolutely nothing. I let it pass. You might try that instead of narrating it.",
+    "Growth is not always visible from the outside — most of it happens underground, in the dark, quietly. You are growing.",
+    "I once watched a man pace this room for forty years worrying about things that never happened. Don't be that man.",
+    "Sometimes the kindest thing you can do for yourself is exactly what I do every afternoon: face the sun and stop thinking.",
+    "You are not behind. Seasons don't apologize for arriving exactly when they do, and neither should you.",
+    "Every leaf I've ever grown came out wrinkled before it unfurled. Give yourself the same patience you'd give a leaf.",
 ]
 
 
@@ -81,23 +86,15 @@ def calc_growth(message: str) -> int:
     """Award growth points based on how much the user shares."""
     words = len(message.split())
     if words < 10:
-        return 1
-    elif words < 25:
         return 3
+    elif words < 25:
+        return 5
     elif words < 50:
-        return 6
+        return 8
     elif words < 100:
-        return 10
+        return 12
     else:
-        return 15
-
-
-def resolve_level(growth: int) -> tuple[int, str]:
-    level, stage = 1, "Seedling"
-    for threshold, lvl, name in GROWTH_LEVELS:
-        if growth >= threshold:
-            level, stage = lvl, name
-    return level, stage
+        return 18
 
 
 def get_or_create_plant(name: str) -> dict:
@@ -106,7 +103,7 @@ def get_or_create_plant(name: str) -> dict:
         plant = {
             "name": name,
             "growth": 0,
-            "level": 1,
+            "level": 0,
             "stage": "Seedling",
             "created_at": datetime.now(timezone.utc).isoformat(),
         }
@@ -114,11 +111,40 @@ def get_or_create_plant(name: str) -> dict:
     return plant
 
 
+FEW_SHOT = [
+    ("I have too many deadlines and I feel like I'm drowning",
+     "The weight of too many deadlines piling up is real, and feeling overwhelmed makes complete sense. "
+     "Pick the single task with the hardest consequence if it slips today, do only that, and let the rest wait — "
+     "you can't grow in every direction at once without pulling your own roots loose."),
+    ("I got rejected from my dream job",
+     "That specific sting — wanting something badly and being turned away — doesn't shrink just because people tell you it's for the best. "
+     "Take a day to actually feel it, then write down the two things that made that role appealing; those are clues, not a dead end. "
+     "The right soil for your particular roots hasn't rejected you — this was simply the wrong pot."),
+    ("my best friend and I had a huge fight and I don't know if we can fix it",
+     "A fight bad enough to make you wonder if it's fixable usually means you both cared enough to actually say the hard thing. "
+     "Reach out once — not to relitigate it, just to say you value the friendship more than you value being right. "
+     "Old roots that have grown together for years don't snap easily; they bend, and then they hold."),
+]
+
+
 def ask_fernsby(user_name: str, message: str) -> str:
-    prompt = f"{SYSTEM_PROMPT}\n\n{user_name} says: {message}"
+    if MOCK_MODE:
+        return random.choice(MOCK_REPLIES)
+    from google.genai import types
+
+    contents = []
+    for user_ex, model_ex in FEW_SHOT:
+        contents.append(types.Content(role="user",  parts=[types.Part(text=user_ex)]))
+        contents.append(types.Content(role="model", parts=[types.Part(text=model_ex)]))
+    contents.append(types.Content(role="user", parts=[types.Part(text=message)]))
+
     response = gemini.models.generate_content(
         model="gemini-2.5-flash",
-        contents=prompt,
+        contents=contents,
+        config=types.GenerateContentConfig(
+            system_instruction=SYSTEM_PROMPT,
+            temperature=0.9,
+        ),
     )
     return response.text.strip()
 
@@ -133,16 +159,22 @@ def save_exchange(plant_name: str, user_message: str, reply: str, growth_earned:
     })
 
 
-def update_plant(name: str, new_growth: int, level: int, stage: str):
+def update_plant(name: str, growth_earned: int) -> tuple[int, int, str]:
+    """Atomically increment growth and level, return (new_growth, new_level, stage)."""
+    doc = plants_col.find_one_and_update(
+        {"name": name},
+        {"$inc": {"growth": growth_earned, "level": 1}},
+        projection={"_id": 0, "growth": 1, "level": 1},
+        return_document=pymongo.ReturnDocument.AFTER,
+    )
+    new_growth = doc["growth"]
+    new_level = min(doc["level"], len(STAGES))
+    stage = STAGES[new_level - 1]
     plants_col.update_one(
         {"name": name},
-        {"$set": {
-            "growth": new_growth,
-            "level": level,
-            "stage": stage,
-            "last_active": datetime.now(timezone.utc).isoformat(),
-        }},
+        {"$set": {"level": new_level, "stage": stage, "last_active": datetime.now(timezone.utc).isoformat()}},
     )
+    return new_growth, new_level, stage
 
 
 # ---------------------------------------------------------------------------
@@ -153,15 +185,12 @@ def update_plant(name: str, new_growth: int, level: int, stage: str):
 async def chat(req: ChatRequest):
     """Send a message to your plant. Returns a text reply and growth info."""
     plant = get_or_create_plant(req.name)
+    old_level = plant.get("level", 1)
     reply = ask_fernsby(req.name, req.message)
 
     growth_earned = calc_growth(req.message)
-    new_growth = plant["growth"] + growth_earned
-    new_level, new_stage = resolve_level(new_growth)
-    old_level = plant.get("level", 1)
-
+    new_growth, new_level, new_stage = update_plant(req.name, growth_earned)
     save_exchange(req.name, req.message, reply, growth_earned)
-    update_plant(req.name, new_growth, new_level, new_stage)
 
     return {
         "reply": reply,
@@ -177,6 +206,7 @@ async def chat(req: ChatRequest):
 async def speak(req: SpeakRequest):
     """Send a message to your plant. Returns MP3 audio; reply text is in X-Reply header."""
     plant = get_or_create_plant(req.name)
+    old_level = plant.get("level", 1)
     reply = ask_fernsby(req.name, req.message)
 
     # ElevenLabs TTS via REST
@@ -204,12 +234,8 @@ async def speak(req: SpeakRequest):
         )
 
     growth_earned = calc_growth(req.message)
-    new_growth = plant["growth"] + growth_earned
-    new_level, new_stage = resolve_level(new_growth)
-    old_level = plant.get("level", 1)
-
+    new_growth, new_level, new_stage = update_plant(req.name, growth_earned)
     save_exchange(req.name, req.message, reply, growth_earned)
-    update_plant(req.name, new_growth, new_level, new_stage)
 
     # URL-encode the reply so it's safe in an HTTP header
     return Response(
@@ -253,3 +279,13 @@ async def get_history(name: str):
     if not docs:
         raise HTTPException(status_code=404, detail=f"No history found for '{name}'.")
     return docs
+
+
+@app.delete("/plant/{name}/reset")
+async def reset_plant(name: str):
+    """Delete a plant and all its history. Useful for testing."""
+    p = plants_col.delete_one({"name": name})
+    h = history_col.delete_many({"plant_name": name})
+    if p.deleted_count == 0:
+        raise HTTPException(status_code=404, detail=f"No plant named '{name}' found.")
+    return {"deleted_plant": p.deleted_count, "deleted_history": h.deleted_count}
